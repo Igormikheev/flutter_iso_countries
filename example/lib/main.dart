@@ -102,12 +102,12 @@ class _MyAppState extends State<MyApp> {
                 onPressed: prepareLocaleSpecificCountries,
                 child: const Text('fr-fr'),
                 style: TextButton.styleFrom(
-                  primary: Colors.white,
+                  foregroundColor: Colors.white,
                 )),
             TextButton(
               onPressed: prepareDefaultCountries,
               style: TextButton.styleFrom(
-                primary: Colors.white,
+                foregroundColor: Colors.white,
               ),
               child: const Text('Default'),
             ),
