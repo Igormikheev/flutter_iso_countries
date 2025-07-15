@@ -11,60 +11,50 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class IsoCountriesPlugin : MethodCallHandler, FlutterPlugin {
 
-    private var channel: MethodChannel? = null
+class IsoCountriesPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
-    companion object {
-        @JvmStatic
-        fun registerWith(registrar: Registrar) {
-            val channel = MethodChannel(registrar.messenger(), "com.anoop4real.iso_countries")
-            channel.setMethodCallHandler(IsoCountriesPlugin())
-        }
-    }
-
-    override fun onMethodCall(call: MethodCall, result: Result) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
-        } else if (call.method == "getISOCountries") {
-            result.success(CountryDataStore.getIsoCountries())
-        } else if (call.method == "getISOCountriesForLocale") {
-            // TODO: Implement in a better way
-            val args = call.arguments as? HashMap<String, String>
-            if (args != null) {
-                val identifier = args.getOrElse("locale_identifier") { "en_US" }
-                result.success(CountryDataStore.getIsoCountries(identifier))
-            } else {
-                result.success(CountryDataStore.getIsoCountries())
-            }
-        } else if (call.method == "getCountryForCountryCodeWithLocaleIdentifier") {
-            val args = call.arguments as? HashMap<String, String>
-            if (args != null) {
-                val identifier = args.getOrElse("locale_identifier") { "" }
-                val code = args.getOrElse("countryCode") { "" }
-                result.success(CountryDataStore.getCountryForCountryCode(code, identifier))
-            } else {
-                // Return an empty hashmap if arguments are missing
-                result.success(hashMapOf<String, String>())
-            }
-        } else {
-            result.notImplemented()
-        }
-    }
+    private lateinit var channel: MethodChannel
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        registerWith(binding.binaryMessenger)
+        channel = MethodChannel(binding.binaryMessenger, "com.anoop4real.iso_countries")
+        channel.setMethodCallHandler(this)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel?.setMethodCallHandler(null)
+        channel.setMethodCallHandler(null)
     }
 
-    private fun registerWith(messenger: BinaryMessenger) {
-        channel = MethodChannel(messenger, "com.anoop4real.iso_countries")
-        channel?.setMethodCallHandler(IsoCountriesPlugin())
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        when (call.method) {
+            "getPlatformVersion" -> {
+                result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            }
+
+            "getISOCountries" -> {
+                result.success(CountryDataStore.getIsoCountries())
+            }
+
+            "getISOCountriesForLocale" -> {
+                val args = call.arguments as? Map<String, String>
+                val identifier = args?.get("locale_identifier") ?: "en_US"
+                result.success(CountryDataStore.getIsoCountries(identifier))
+            }
+
+            "getCountryForCountryCodeWithLocaleIdentifier" -> {
+                val args = call.arguments as? Map<String, String>
+                val identifier = args?.get("locale_identifier") ?: ""
+                val code = args?.get("countryCode") ?: ""
+                result.success(CountryDataStore.getCountryForCountryCode(code, identifier))
+            }
+
+            else -> {
+                result.notImplemented()
+            }
+        }
     }
 }
+
 
 class CountryDataStore private constructor() {
 

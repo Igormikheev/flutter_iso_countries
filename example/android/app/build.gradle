@@ -23,8 +23,9 @@ def flutterVersionCode = localProperties.getProperty('flutter.versionCode') ?: '
 def flutterVersionName = localProperties.getProperty('flutter.versionName') ?: '1.0'
 
 android {
-    compileSdkVersion 34
-
+    compileSdkVersion 35
+    namespace 'com.anoop4real.iso_countries_example'
+    
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
